@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: dns-failover-dashboard
+    env: docker
+    plan: free
+    dockerFilePath: Dockerfile
+    envVars:
+      - key: API_TOKEN
+        value: supersecretapitoken
+      - key: DATABASE_URL
+        value: sqlite:///./primary.db
+      - key: FALLBACK_DATABASE_URL
+        value: sqlite:///./fallback.db
+      - key: FALLBACK_DATABASE_URL_2
+        value: sqlite:///./fallback_2.db
+      - key: FALLBACK_DATABASE_URL_3
+        value: sqlite:///./fallback_3.db
+      - key: FALLBACK_DATABASE_URL_4
+        value: sqlite:///./fallback_4.db
+      - key: FALLBACK_DATABASE_URL_5
+        value: sqlite:///./fallback_5.db
+      - key: FALLBACK_DATABASE_URL_6
+        value: sqlite:///./fallback_6.db
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: CLOUDFLARE_API_TOKEN
+        value: mock_cf_token
+      - key: CLOUDFLARE_ACCOUNT_ID
+        value: mock_cf_account
+      - key: CLOUDFLARE_ZONE_ID
+        value: mock_cf_zone
