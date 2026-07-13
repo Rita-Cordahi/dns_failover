@@ -714,13 +714,16 @@ async def health_failover(
         elif idx == 0 and DatabaseCircuitBreaker.is_tripped():
             is_healthy = False
         else:
-            try:
-                # Quick check connection
-                async with session_maker() as test_session:
-                    await test_session.execute(text("SELECT 1"))
-                    is_healthy = True
-            except Exception:
-                is_healthy = False
+            if is_active:
+                is_healthy = True
+            else:
+                try:
+                    # Quick check connection
+                    async with session_maker() as test_session:
+                        await test_session.execute(text("SELECT 1"))
+                        is_healthy = True
+                except Exception:
+                    is_healthy = False
                     
         db_status_list.append({
             "name": names[idx],
