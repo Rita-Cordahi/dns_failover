@@ -11,6 +11,8 @@ jinja2
 aiosqlite
 httpx
 h2
+websockets
+
 
 
 
