@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - API_TOKEN=supersecretapitoken
+      - DATABASE_URL=sqlite:///./primary.db
+      - FALLBACK_DATABASE_URL=sqlite:///./fallback.db
+      - CLOUDFLARE_API_TOKEN=mock_cf_token
+      - CLOUDFLARE_ACCOUNT_ID=mock_cf_account
+      - CLOUDFLARE_ZONE_ID=mock_cf_zone
+      - DISCORD_WEBHOOK_URL=
+      - BREVO_API_KEY=
+      - ALERT_EMAIL_TO=admin@example.com
+      - ALERT_EMAIL_FROM=alerts@example.com
+    volumes:
+      - sqlite_data:/app
+    restart: always
+
+volumes:
+  sqlite_data:

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Failover Monitor & Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css?v=2">
+</head>
+<body>
+    <div class="glass-bg-glow"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header glass-panel">
+            <div class="brand">
+                <div class="logo-orb"></div>
+                <h1>DNS Failover <span class="gradient-text">Matrix</span></h1>
+            </div>
+            <div class="header-status">
+                <span id="refresh-badge" class="badge idle">Idle</span>
+                <button id="theme-toggle-btn" class="icon-btn" title="Toggle Light/Dark Mode">☀️</button>
+                <button id="voice-toggle-btn" class="icon-btn" title="Toggle Voice Alerts">🔊</button>
+                <button id="auth-toggle-btn" class="icon-btn" title="Configure Auth Key">🔑</button>
+            </div>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Health Monitor Alert -->
+            <section class="span-all health-alert-bar glass-panel" id="system-status-container">
+                <div class="status-indicator-ring healthy" id="status-ring">
+                    <div class="status-core"></div>
+                </div>
+                <div class="status-text-block">
+                    <h2>System Status: <span id="system-status-text">HEALTHY</span></h2>
+                    <p id="system-status-desc">All systems routing normally. Latency check normal.</p>
+                </div>
+            </section>
+
+            <!-- Metrics Cards -->
+            <div class="metric-card glass-panel" id="db-metric-card">
+                <h3>Database Latency</h3>
+                <div class="metric-value">
+                    <span id="db-latency-val">--</span><span class="unit">ms</span>
+                </div>
+                <div class="metric-footer">
+                    <span>Engine:</span> <strong id="db-engine-val" class="gradient-text-blue">Primary</strong>
+                </div>
+            </div>
+
+            <div class="metric-card glass-panel">
+                <h3>System CPU</h3>
+                <div class="metric-value">
+                    <span id="cpu-val">--</span><span class="unit">%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="cpu-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="metric-card glass-panel">
+                <h3>System Memory</h3>
+                <div class="metric-value">
+                    <span id="memory-val">--</span><span class="unit">%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="memory-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Cloudflare Routing Pools -->
+            <section class="cf-pools-panel glass-panel">
+                <div class="panel-header">
+                    <h2>Cloudflare Load Balancer Pools</h2>
+                    <span class="api-label">Live Sync</span>
+                </div>
+                <div class="pools-container" id="pools-list">
+                    <!-- Dynamic pools go here -->
+                    <div class="pool-item loading">Loading Cloudflare pool status...</div>
+                </div>
+            </section>
+
+            <!-- Manual Routing Control -->
+            <section class="manual-control-panel glass-panel">
+                <h2>Manual Traffic Control Override</h2>
+                <p class="panel-desc">Force database/DNS traffic steering to specific regions immediately. Updates Cloudflare API configurations.</p>
+                
+                <div class="control-actions">
+                    <button class="btn btn-primary" id="btn-force-primary" title="توجيه كافة الزيارات للسيرفر الأساسي فقط (إيقاف الاحتياطي مؤقتاً). يُستخدم: عند إجراء صيانة أو تحديثات على السيرفر الاحتياطي.">Force Primary Region Only</button>
+                    <button class="btn btn-secondary" id="btn-force-backup" title="تحويل كافة الزيارات فوراً للسيرفر الاحتياطي. يُستخدم: كإجراء طوارئ يدوي عاجل في حال تعطل السيرفر الأساسي بالكامل لإنقاذ الموقع من التوقف.">Force Backup Region Only</button>
+                    <button class="btn btn-tertiary" id="btn-force-both" title="تفعيل السيرفرين معاً لتوزيع الضغط تلقائياً. يُستخدم: في الحالة الطبيعية واليومية لضمان سرعة التصفح لجميع المستخدمين.">Active-Active (All Enabled)</button>
+                    <button class="btn btn-secondary" style="border: 1px dashed #ff9f43;" id="btn-simulate-failover" title="محاكاة وهمية لعملية الإنقاذ واختبار إشعارات الطوارئ. يُستخدم: عند الرغبة بفحص نظام التنبيهات والإيميلات بشكل آمن دون التأثير على حركة الزوار.">Simulate Failover (Dry Run)</button>
+                </div>
+
+                <div class="override-status-note" id="override-status-message">
+                    Select a control override configuration. Requires secure token authorization.
+                </div>
+            </section>
+
+            <!-- Database Redundancy Chain Panel -->
+            <section class="span-all db-chain-panel glass-panel">
+                <div class="panel-header">
+                    <h2>Database Failover Redundancy Chain (7 Tiers)</h2>
+                    <span class="api-label" style="background: rgba(0, 242, 254, 0.1); color: var(--color-healthy); border: 1px solid var(--color-healthy);">Active: <span id="active-db-name">primary</span></span>
+                </div>
+                <p class="panel-desc" style="margin-top: 5px; color: var(--text-muted); font-size: 0.85rem;">
+                    سلسلة حماية خوادم قواعد البيانات الاحتياطية. يتم التحويل التلقائي والإنقاذ الذاتي فور استشعار أي توقف أو بطء.
+                </p>
+                <div class="db-chain-container" id="db-chain-list">
+                    <!-- Dynamic database nodes go here -->
+                </div>
+            </section>
+
+            <!-- Real-Time Event Terminal -->
+            <section class="span-all terminal-panel glass-panel">
+                <div class="panel-header">
+                    <h2>Audit Logs & Failover History</h2>
+                    <button id="clear-logs-btn" class="text-btn">Refresh Logs</button>
+                </div>
+                <div class="terminal-logs" id="logs-container">
+                    <!-- Logs list -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Auth Settings Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-content glass-panel">
+            <h2>API Key Token Configuration</h2>
+            <p>Set your Bearer Token to authenticate API endpoints and manual routing overrides.</p>
+            <div class="input-group">
+                <input type="password" id="api-token-input" placeholder="Enter Bearer API Token">
+                <button id="save-token-btn" class="btn btn-primary">Save Key</button>
+            </div>
+            <button id="close-modal-btn" class="close-btn">&times;</button>
+        </div>
+    </div>
+
+    <!-- Override Confirmation Modal (Secure Override Confirmation Popup Timer) -->
+    <div class="modal-overlay" id="override-confirm-modal">
+        <div class="modal-content glass-panel override-modal">
+            <h2>⚠️ Secure Override Confirmation</h2>
+            <p id="override-warning-text">You are about to trigger a manual traffic routing override.</p>
+            <div class="timer-warning-box">
+                <p>This action updates live routing policies on Cloudflare. Please review this action carefully.</p>
+                <div class="cooldown-timer" id="override-cooldown-text">Please wait 5s to confirm...</div>
+            </div>
+            <div class="auto-dismiss-bar-container">
+                <div class="auto-dismiss-bar" id="override-dismiss-bar" style="width: 100%"></div>
+            </div>
+            <p class="auto-dismiss-text" id="override-dismiss-text">Auto-cancelling in 15 seconds...</p>
+            <div class="modal-actions">
+                <button id="cancel-override-btn" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-override-btn" class="btn btn-primary" disabled>Confirm (5s)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Alerts Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
