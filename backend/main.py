@@ -714,15 +714,13 @@ async def health_failover(
         elif idx == 0 and DatabaseCircuitBreaker.is_tripped():
             is_healthy = False
         else:
-            from backend.database import is_sqlite_file_locked
-            if not is_sqlite_file_locked(url):
-                try:
-                    # Quick check connection
-                    async with session_maker() as test_session:
-                        await test_session.execute(text("SELECT 1"))
-                        is_healthy = True
-                except Exception:
-                    is_healthy = False
+            try:
+                # Quick check connection
+                async with session_maker() as test_session:
+                    await test_session.execute(text("SELECT 1"))
+                    is_healthy = True
+            except Exception:
+                is_healthy = False
                     
         db_status_list.append({
             "name": names[idx],

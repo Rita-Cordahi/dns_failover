@@ -263,11 +263,7 @@ async def get_db():
             primary_exc = Exception("Primary database connection pool circuit breaker is tripped (Cooldown active).")
             continue
 
-        locked = is_sqlite_file_locked(active_db_urls[idx])
-        if locked:
-            if idx == 0:
-                primary_exc = Exception("Primary SQLite database file is locked.")
-            continue
+
 
         try:
             db = session_maker()
