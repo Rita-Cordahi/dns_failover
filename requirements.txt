@@ -9,5 +9,7 @@ prometheus-client>=0.17.0
 brotli
 jinja2
 aiosqlite
+httpx
+
 
 
