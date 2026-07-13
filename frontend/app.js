@@ -1,5 +1,7 @@
 const DEFAULT_TOKEN = "supersecretapitoken";
 let apiToken = localStorage.getItem("dns_failover_api_token") || DEFAULT_TOKEN;
+let speechEnabled = localStorage.getItem("dns_failover_speech") !== "false";
+
 
 // DOM Elements
 const refreshBadge = document.getElementById("refresh-badge");
@@ -489,7 +491,7 @@ initVoiceAlerts();
 startPolling();
 
 // Speech Synthesis Voice Alerts Logic
-let speechEnabled = localStorage.getItem("dns_failover_speech") !== "false";
+
 
 function initVoiceAlerts() {
     updateVoiceButtonUI();
